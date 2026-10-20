@@ -1,0 +1,11 @@
+#!/bin/bash
+
+export BOT_TOKEN=""
+export CHAT_ID=""
+export KDIR="kernel"
+
+export kernel_repo="https://github.com/MrGadget84/white_kernel_samsung_mt6768"
+export kernel_branch="legacy"
+
+export PATCH_KSU="both"
+export COMPILERS="AOSP-Clang-11"
