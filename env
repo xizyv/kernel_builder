@@ -9,7 +9,7 @@ export outside="${maindir}/.."
 
 export ARCH="arm64"
 export SUBARCH="arm64"
-export KBUILD_BUILD_USER="MrGadget84"
+export KBUILD_BUILD_USER="xizyv"
 export KBUILD_BUILD_HOST="github"
 
 export defconfig="a32_lineage_defconfig"
