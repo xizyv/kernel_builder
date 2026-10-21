@@ -23,12 +23,8 @@ on: # [push]
         default: 'https://github.com/MrGadget84/white_kernel_samsung_mt6768'
       KBRANCH:
         description: 'kernel branch'
-        type: choice
-        options:
-          - infinity
-          - legacy
-          - dev
-        default: legacy
+        required: true
+        default: 'legacy'
       NOTES:
         description: 'notes to print out'
         required: false
@@ -37,6 +33,14 @@ on: # [push]
         description: 'suffix to aplly to teh zip filename'
         required: false
         default: ''
+      DCFG:
+        description: 'defconfig file name'
+        required: true
+        default: 'a32_lineage_defconfig'
+      REBRAND:
+        description: 'kernel localversion'
+        required: false
+        default: 'xizyv-a32-legacy'
       ZREPO:
         description: 'zipper repo'
         required: true
@@ -76,6 +80,8 @@ env:
   zipper_repo: ${{ github.event.inputs.ZREPO }}
   zipper_branch: ${{ github.event.inputs.ZBRANCH }}
   TZ: Asia/Ho_Chi_Minh
+  DCFG: ${{ github.event.inputs.DCFG }}
+  REBRAND: ${{ github.event.inputs.REBRAND }}
 
 jobs:
   build:
