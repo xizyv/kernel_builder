@@ -9,3 +9,5 @@ export kernel_branch="legacy"
 
 export PATCH_KSU="baka"
 export COMPILERS="AOSP-Clang-11"
+export DCFG="a32_lineage_defconfig"
+export REBRAND="xizyv-a32-legacy"
