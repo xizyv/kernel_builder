@@ -7,5 +7,5 @@ export KDIR="kernel"
 export kernel_repo="https://github.com/MrGadget84/white_kernel_samsung_mt6768"
 export kernel_branch="legacy"
 
-export PATCH_KSU="non-root"
+export PATCH_KSU="baka"
 export COMPILERS="AOSP-Clang-11"
