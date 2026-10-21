@@ -53,11 +53,11 @@ on: # [push]
           - both
           - baka
           - kow
-        default: kow
+        default: baka
       TG_RECIPENT:
         description: 'group id'
-        required: true
-        default: '-1003050733874'
+        required: false
+        default: ''
       CONTAINER:
         description: 'if you know you know'
         required: true
