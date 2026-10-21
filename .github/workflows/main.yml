@@ -1,4 +1,4 @@
-name: Blossom Building kernel
+name: A32 Building kernel
 
 on: # [push]
 #  release:
@@ -40,11 +40,11 @@ on: # [push]
       ZREPO:
         description: 'zipper repo'
         required: true
-        default: 'https://github.com/osm0sis/AnyKernel3'
+        default: 'https://github.com/MrGadget84/AnyKernel3'
       ZBRANCH:
         description: 'zipper branch'
         required: true
-        default: 'master'
+        default: 'a325f'
       KSU:
         description: 'if dont want ksu then leave blank'
         type: choice
