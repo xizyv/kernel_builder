@@ -12,7 +12,7 @@ export SUBARCH="arm64"
 export KBUILD_BUILD_USER="xizyv"
 export KBUILD_BUILD_HOST="github"
 
-export defconfig="a32_lineage_defconfig"
+export defconfig="${DCFG:-a32_lineage_defconfig}"
 
 if [[ -z "$zipper_repo" ]]; then
   export zipper_repo="https://github.com/MrGadget84/AnyKernel3"
@@ -36,6 +36,9 @@ if [ ! -f "${defconfig_file}" ]; then
     echo "New modular Kbuild detected! Adjusting vars for branch Infinity..."
     cat "${maindir}/arch/${ARCH}/configs/mt6768-unifiedk414_lineage_defconfig" "${maindir}/arch/${ARCH}/configs/a32.config" > "${maindir}/arch/${ARCH}/configs/a32_lineage_defconfig"
   fi
+fi
+if [[ -n "$REBRAND" ]]; then
+  sed -i "s/^CONFIG_LOCALVERSION=.*/CONFIG_LOCALVERSION=\"-${REBRAND}\"/" "${defconfig_file}"
 fi
 
 export kernel_head="$(git log --pretty=format:'%h' -1)"
