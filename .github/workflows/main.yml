@@ -56,7 +56,6 @@ on: # [push]
           - non-root
           - both
           - baka
-          - kow
         default: baka
       TG_RECIPENT:
         description: 'group id'
