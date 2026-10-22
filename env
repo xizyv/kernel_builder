@@ -38,8 +38,10 @@ if [ ! -f "${defconfig_file}" ]; then
   fi
 fi
 if [[ -n "$REBRAND" ]]; then
-  sed -i "s/^CONFIG_LOCALVERSION=.*/CONFIG_LOCALVERSION=\"-${REBRAND}\"/" "${defconfig_file}"
+  sed -i '/^CONFIG_LOCALVERSION=/d' "${defconfig_file}"
+  echo "CONFIG_LOCALVERSION=\"-${REBRAND}\"" >> "${defconfig_file}"
 fi
+
 
 export kernel_head="$(git log --pretty=format:'%h' -1)"
 export kernel_name=$(cat "${defconfig_file}" | grep "CONFIG_LOCALVERSION=" | sed 's/CONFIG_LOCALVERSION="-*//g' | sed 's/"*//g' )
