@@ -177,9 +177,10 @@ jobs:
         - name: Upload Kernel to GitHub Artifacts
           uses: actions/upload-artifact@v4
           with:
-            name: A32_Kernel_BakaSU
-            path: kernel/*.zip
-            retention-days: 7
+          name: kernel-${{ github.event.inputs.REBRAND }}-${{ github.run_number }}
+          path: kernel/*.zip
+          retention-days: 7
+
         - name: if it fails
           if: ${{ failure() }}
           run: |
