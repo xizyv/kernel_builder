@@ -1,5 +1,5 @@
 #!/bin/bash
-#
+[ -z "${BOT_TOKEN}" ] && exit 0
 # ...exists to not have ugly looking code blocks in ci lmao
 
 case $1 in
