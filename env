@@ -1,36 +1,13 @@
 #!/bin/bash
-#
-# config and common vars (Galaxy A51 / Exynos 9611)
+#На всякий случай
 
-export maindir="$(pwd)"
-export outside="${maindir}/.."
+export BOT_TOKEN=""
+export CHAT_ID=""
+export KDIR="kernel"
 
-#
+export kernel_repo="https://github.com/xizyv/whitesu_kernel_samsung_universal9611"
+export kernel_branch="lineage-24.0"
 
-export ARCH="arm64"
-export SUBARCH="arm64"
-export KBUILD_BUILD_USER="xizyv"
-export KBUILD_BUILD_HOST="github"
-
-# old 4.14 code trips -Werror on newer clang (declaration-after-statement)
-export KCFLAGS="-Wno-error"
-
-export defconfig="${DCFG:-exynos9611-a51_defconfig}"
-
-# AnyKernel3 folder that lives inside the kernel repo
-export AK3_DIR="${AK3_DIR:-AnyKernel3}"
-
-export out_image="${maindir}/out/arch/${ARCH}/boot/Image"
-
-export zipper="${outside}/zipper"
-
-#
-
-export defconfig_file="${maindir}/arch/${ARCH}/configs/${defconfig}"
-
-export kernel_head="$(git log --pretty=format:'%h' -1)"
-export kernel_name=$(cat "${defconfig_file}" | grep "CONFIG_LOCALVERSION=" | sed 's/CONFIG_LOCALVERSION="-*//g' | sed 's/"*//g' )
-export kernel_ver="$(make kernelversion)"
-export TIME=$(date +"%y%m%d-%H%M")
-
-export zip_name="${maindir}/${kernel_name}${SUFFIX}-${TIME}-${kernel_head}.zip"
+export PATCH_KSU="non-root"
+export COMPILERS="Proton-Clang"
+export DCFG="exynos9611-a51_defconfig"
