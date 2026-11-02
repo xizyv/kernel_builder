@@ -1,13 +1,13 @@
 #!/bin/bash
+#На всякий случай
 
 export BOT_TOKEN=""
 export CHAT_ID=""
 export KDIR="kernel"
 
-export kernel_repo="https://github.com/MrGadget84/white_kernel_samsung_mt6768"
-export kernel_branch="legacy"
+export kernel_repo="https://github.com/xizyv/whitesu_kernel_samsung_universal9611"
+export kernel_branch="lineage-24.0"
 
-export PATCH_KSU="baka"
-export COMPILERS="AOSP-Clang-11"
-export DCFG="a32_lineage_defconfig"
-export REBRAND="xizyv-a32-legacy"
+export PATCH_KSU="non-root"
+export COMPILERS="Proton-Clang"
+export DCFG="exynos9611-a51_defconfig"
