@@ -1,68 +1,42 @@
-name: A32 Building kernel
+name: A51 Building kernel
 
-on: # [push]
-#  release:
-#    types: [published]
-#  push:
-#    branches:
-#      - master
-#    paths:
-#      - '.config'
-#  schedule:
-#    - cron: 0 8 * * 5
-# Allows you to run this workflow manually from the Actions tab
+on:
   workflow_dispatch:
     inputs:
       COMPILER:
-        description: 'compilers used'
+        description: 'compiler (file name in toolchains/ without .sh)'
         required: true
-        default: 'AOSP-Clang-11'
+        default: 'Proton-Clang'
       KREPO:
         description: 'kernel repo'
         required: true
-        default: 'https://github.com/MrGadget84/white_kernel_samsung_mt6768'
+        default: 'https://github.com/xizyv/whitesu_kernel_samsung_universal9611'
       KBRANCH:
         description: 'kernel branch'
         required: true
-        default: 'legacy'
-      NOTES:
-        description: 'notes to print out'
-        required: false
-        default: ''
-      SUFFIX:
-        description: 'suffix to aplly to teh zip filename'
-        required: false
-        default: ''
+        default: 'lineage-24.0'
       DCFG:
         description: 'defconfig file name'
         required: true
-        default: 'a32_lineage_defconfig'
-      REBRAND:
-        description: 'kernel localversion'
-        required: false
-        default: 'xizyv-a32-legacy'
-      ZREPO:
-        description: 'zipper repo'
-        required: true
-        default: 'https://github.com/MrGadget84/AnyKernel3'
-      ZBRANCH:
-        description: 'zipper branch'
-        required: true
-        default: 'a325f'
+        default: 'exynos9611-a51_defconfig'
       KSU:
-        description: 'if dont want ksu then leave blank'
+        description: 'WhiteSU: non-root = clean kernel, white = with WhiteSU, both = build both'
         type: choice
         options:
           - non-root
+          - white
           - both
-          - baka
-        default: baka
-      TG_RECIPENT:
-        description: 'group id'
+        default: non-root
+      SUFFIX:
+        description: 'suffix for the zip filename'
+        required: false
+        default: ''
+      NOTES:
+        description: 'notes to send to telegram'
         required: false
         default: ''
       CONTAINER:
-        description: 'if you know you know'
+        description: 'build container image'
         required: true
         default: 'fedora:40'
 
@@ -70,126 +44,105 @@ env:
   BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
   CHAT_ID: ${{ secrets.CHAT_ID }}
   REPO: ${{ github.event.inputs.KREPO }}
-  RUN_NUM: ${{ github.run_number }}_${{ github.run_attempt }}
   KERNEL_BRANCH: ${{ github.event.inputs.KBRANCH }}
-  NOTE: ${{ github.event.inputs.NOTES }}
   COMPILERS: ${{ github.event.inputs.COMPILER }}
   PATCH_KSU: ${{ github.event.inputs.KSU }}
-  SUFFIX: ${{ github.event.inputs.SUFFIX }}
-  zipper_repo: ${{ github.event.inputs.ZREPO }}
-  zipper_branch: ${{ github.event.inputs.ZBRANCH }}
-  TZ: Asia/Ho_Chi_Minh
   DCFG: ${{ github.event.inputs.DCFG }}
-  REBRAND: ${{ github.event.inputs.REBRAND }}
+  SUFFIX: ${{ github.event.inputs.SUFFIX }}
+  NOTE: ${{ github.event.inputs.NOTES }}
+  RUN_NUM: ${{ github.run_number }}_${{ github.run_attempt }}
+  TZ: Asia/Ho_Chi_Minh
 
 jobs:
   build:
     runs-on: ubuntu-latest
     container:
       image: ${{ github.event.inputs.CONTAINER }}
+    defaults:
+      run:
+        shell: bash
 
     steps:
-        - name: checkout
-          uses: actions/checkout@master
-        - name: why
-          run: |
-            echo WORKFLOW_START=$(date +"%s") >> $GITHUB_ENV
-            ALT_RECIPENT=${{ github.event.inputs.TG_RECIPENT }}
-            if [ ! -z $ALT_RECIPENT ]; then
-              echo CHAT_ID="$ALT_RECIPENT" >> $GITHUB_ENV
-            fi
-        - name: start of workflow
-          run: |
-            bash tg_utils.sh msg "gh $RUN_NUM: workflow started"
-        - name: init build env
-          run: |
-            dnf group install development-tools -y
-            dnf install which llvm lld bc bison ca-certificates curl flex glibc-devel.i686 glibc-devel binutils-devel openssl python3 python2 zstd clang gcc-arm-linux-gnu dtc libxml2 libarchive openssl-devel perl tomsfastmath-devel wget xz -y
-            ln -sf "/usr/bin/python3" /usr/bin/python
-            git config --global user.name "John Doe"
-            git config --global user.email "idk@example.com"
-        - name: show host info
-          run: |
-            if [ ! -z "$VERBOSE" ]; then
-              bash tg_utils.sh msg "gh $RUN_NUM: build env initialized%nlgh $RUN_NUM: host: $(cat /etc/os-release | grep PRETTY_NAME | cut -d'=' -f2)%nlgh $RUN_NUM: free disk space: $(df --sync -BM --output=avail / | grep -v Avail)"
-            fi
-        - name: print notes if exists
-          run: |
-            if [ ! -z "$NOTE" ]; then
-              bash tg_utils.sh msg "gh $RUN_NUM: $NOTE"
-            fi
-        - name: clone kernel source
-          run: |
-            if [ ! -z "$VERBOSE" ]; then
-              bash tg_utils.sh msg "gh $RUN_NUM: cloning kernel source%nlgh $RUN_NUM: repo: $REPO%nlgh $RUN_NUM: branch: $KERNEL_BRANCH"
-            fi
-            git clone --depth=1 --single-branch $REPO -b $KERNEL_BRANCH kernel
-        - name: print kernel info
-          run: |
-            cd kernel
-            source ../env
-            bash ../tg_utils.sh msg "gh $RUN_NUM: kernel name: ${kernel_name}%nlgh $RUN_NUM: kernel ver: ${kernel_ver}%nlgh $RUN_NUM: kernel head commit: ${kernel_head}%nlgh $RUN_NUM: defconfig: ${defconfig}"
-        - name: run compilation scripts
-          run: |
-            cd kernel
-            case $PATCH_KSU in
-              "both" )
-                bash ../tg_utils.sh msg "gh $RUN_NUM: running compilation script(s): $COMPILERS"
-                bash ../build.sh "$COMPILERS"
-                bash ../tg_utils.sh msg "gh $RUN_NUM: KernelSU patching enabled, patching"
-                bash ../ksu/baka.sh
-                bash ../tg_utils.sh msg "gh $RUN_NUM: running compilation script(s): $COMPILERS"
-                bash ../build.sh "$COMPILERS"
-              ;;
-              "baka" )
-                bash ../tg_utils.sh msg "gh $RUN_NUM: ReSukiSU patching enabled, patching"
-                bash ../ksu/baka.sh
-                bash ../tg_utils.sh msg "gh $RUN_NUM: running compilation script(s): $COMPILERS"
-                bash ../build.sh "$COMPILERS"
-              ;;
-              "kow" )
-                bash ../tg_utils.sh msg "gh $RUN_NUM: KowSU patching enabled, patching"
-                bash ../ksu/kow.sh
-                bash ../tg_utils.sh msg "gh $RUN_NUM: running compilation script(s): $COMPILERS"
-                bash ../build.sh "$COMPILERS"
-              ;;
-              "non-root" )
-                bash ../tg_utils.sh msg "gh $RUN_NUM: running compilation script(s): $COMPILERS"
-                bash ../build.sh "$COMPILERS"
-              ;;
-            esac
+      - name: checkout builder
+        uses: actions/checkout@v4
 
-        - name: upload
-          run: |
-            cd kernel
-            if [[ $(ls *.zip) ]]; then
-              for file in *.zip ; do
-                bash ../tg_utils.sh up "${file}" "$(cat "${file}.info")"
-              done
-            fi
-            if [[ $(ls *.log) ]]; then
-              for file in *.log ; do
-                if [ -e "${file}.info" ]; then
-                  bash ../tg_utils.sh up "${file}" "$(cat "${file}.info")"
-                fi
-              done
-            fi
-        - name: Upload Kernel to GitHub Artifacts
-          uses: actions/upload-artifact@v4
-          with:
-            name: kernel-${{ github.event.inputs.REBRAND }}-${{ github.run_number }}
-            path: kernel/*.zip
-            retention-days: 7
+      - name: start
+        run: |
+          echo WORKFLOW_START=$(date +"%s") >> $GITHUB_ENV
+          bash tg_utils.sh msg "gh $RUN_NUM: workflow started (KSU mode: $PATCH_KSU)"
+          if [ -n "$NOTE" ]; then
+            bash tg_utils.sh msg "gh $RUN_NUM: $NOTE"
+          fi
 
-        - name: if it fails
-          if: ${{ failure() }}
-          run: |
-            WORKFLOW_END=$(date +"%s")
-            WDIFF=$((WORKFLOW_END - WORKFLOW_START))
-            bash tg_utils.sh msg "gh $RUN_NUM: workflow failed in $((WDIFF / 60))m, $((WDIFF % 60))s"
-        - name: end of workflow
-          run: |
-            WORKFLOW_END=$(date +"%s")
-            WDIFF=$((WORKFLOW_END - WORKFLOW_START))
-            bash tg_utils.sh msg "gh $RUN_NUM: workflow ended in $((WDIFF / 60))m, $((WDIFF % 60))s"
+      - name: init build env
+        run: |
+          dnf group install development-tools -y
+          dnf install which llvm lld bc bison ca-certificates curl flex glibc-devel.i686 glibc-devel binutils-devel openssl python3 python2 zstd clang gcc-arm-linux-gnu dtc libxml2 libarchive openssl-devel perl tomsfastmath-devel wget xz -y
+          ln -sf "/usr/bin/python3" /usr/bin/python
+          git config --global user.name "John Doe"
+          git config --global user.email "idk@example.com"
 
+      - name: clone kernel source
+        run: git clone --depth=1 --single-branch "$REPO" -b "$KERNEL_BRANCH" kernel
+
+      - name: print kernel info
+        run: |
+          cd kernel
+          source ../env
+          bash ../tg_utils.sh msg "gh $RUN_NUM: kernel: ${kernel_name} ${kernel_ver}%nlgh $RUN_NUM: head: ${kernel_head}%nlgh $RUN_NUM: defconfig: ${defconfig}"
+
+      - name: compile
+        run: |
+          cd kernel
+          case "$PATCH_KSU" in
+            "non-root" )
+              bash ../build.sh "$COMPILERS"
+            ;;
+            "white" )
+              bash ../ksu/white.sh
+              bash ../build.sh "$COMPILERS"
+            ;;
+            "both" )
+              bash ../build.sh "$COMPILERS"
+              bash ../ksu/white.sh
+              bash ../build.sh "$COMPILERS"
+            ;;
+          esac
+
+      - name: show first errors
+        if: ${{ failure() }}
+        run: |
+          grep -nE "error:|undefined reference|No such file|\*\*\* \[" kernel/*.log | head -30 || true
+
+      - name: upload to telegram
+        run: |
+          cd kernel
+          for file in *.zip ; do
+            [ -e "$file" ] && bash ../tg_utils.sh up "${file}" "$(cat "${file}.info")"
+          done
+          for file in *.log ; do
+            [ -e "${file}.info" ] && bash ../tg_utils.sh up "${file}" "$(cat "${file}.info")"
+          done
+          true
+
+      - name: upload kernel zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: kernel-a51-${{ github.run_number }}
+          path: kernel/*.zip
+          retention-days: 7
+          if-no-files-found: error
+
+      - name: upload build log
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log-${{ github.run_number }}
+          path: kernel/*.log
+          if-no-files-found: ignore
+
+      - name: finish
+        if: ${{ always() }}
+        run: |
+          WDIFF=$(( $(date +"%s") - WORKFLOW_START ))
+          bash tg_utils.sh msg "gh $RUN_NUM: workflow ${{ job.status }} in $((WDIFF / 60))m, $((WDIFF % 60))s"
