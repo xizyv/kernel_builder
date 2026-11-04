@@ -38,7 +38,7 @@ on:
       CONTAINER:
         description: 'build container image'
         required: true
-        default: 'fedora:40'
+        default: 'ubuntu:22.04'
 
 env:
   BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
@@ -66,6 +66,22 @@ jobs:
       - name: checkout builder
         uses: actions/checkout@v4
 
+      - name: init build env
+        run: |
+          if command -v dnf >/dev/null 2>&1; then
+            dnf group install development-tools -y
+            dnf install which llvm lld bc bison ca-certificates curl flex glibc-devel.i686 glibc-devel binutils-devel openssl python3 python2 zstd clang gcc-arm-linux-gnu dtc libxml2 libarchive openssl-devel perl tomsfastmath-devel wget xz -y
+            ln -sf "/usr/bin/python3" /usr/bin/python
+          else
+            export DEBIAN_FRONTEND=noninteractive
+            apt-get update
+            apt-get install -y build-essential bc bison flex libssl-dev libelf-dev \
+              zip cpio lz4 git curl wget xz-utils device-tree-compiler \
+              python3 python-is-python3 ca-certificates libxml2 perl
+          fi
+          git config --global user.name "John Doe"
+          git config --global user.email "idk@example.com"
+
       - name: start
         run: |
           echo WORKFLOW_START=$(date +"%s") >> $GITHUB_ENV
@@ -73,14 +89,6 @@ jobs:
           if [ -n "$NOTE" ]; then
             bash tg_utils.sh msg "gh $RUN_NUM: $NOTE"
           fi
-
-      - name: init build env
-        run: |
-          dnf group install development-tools -y
-          dnf install which llvm lld bc bison ca-certificates curl flex glibc-devel.i686 glibc-devel binutils-devel openssl python3 python2 zstd clang gcc-arm-linux-gnu dtc libxml2 libarchive openssl-devel perl tomsfastmath-devel wget xz -y
-          ln -sf "/usr/bin/python3" /usr/bin/python
-          git config --global user.name "John Doe"
-          git config --global user.email "idk@example.com"
 
       - name: clone kernel source
         run: git clone --depth=1 --single-branch "$REPO" -b "$KERNEL_BRANCH" kernel
