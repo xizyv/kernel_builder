@@ -14,7 +14,7 @@ on:
       KBRANCH:
         description: 'kernel branch'
         required: true
-        default: 'lineage-24.0'
+        default: 'A17'
       DCFG:
         description: 'defconfig file name'
         required: true
