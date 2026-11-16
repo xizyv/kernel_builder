@@ -15,4 +15,4 @@ grep 'CONFIG_LOCALVERSION=' "${defconfig_file}"
 grep 'CONFIG_KSU' "${defconfig_file}"
 sed -i "s/\(CONFIG_LOCALVERSION=\)\(.*\)/\1\"-${kernel_name}-WhiteSU${KSU_ver}\"/" "${defconfig_file}"
 echo -e " \nincludes WhiteSU (legacy), ver ${KSU_ver}" >> banner_append
-echo -e " \nincludes NoMount v2.2.0" >> banner_append
+echo -e " \nincludes NoMount v2.3.0" >> banner_append
